@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erik Eike — Projetos GitHub</title>
+  <link rel="stylesheet" href="../style/style.css">
+  <style>
+    .repos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .repo-card {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+    }
+    .repo-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(245,158,11,.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,.3), 0 0 30px rgba(245,158,11,.08);
+    }
+    .repo-banner {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(220,38,38,.05));
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .repo-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--trans);
+    }
+    .repo-card:hover .repo-banner img {
+      transform: scale(1.05);
+    }
+    .repo-body {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+    .repo-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .repo-icon {
+      width: 46px; height: 46px;
+      border-radius: var(--r-sm);
+      background: rgba(245,158,11,.1);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .repo-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ice);
+      margin-bottom: 4px;
+    }
+    .repo-lang {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--gold);
+      letter-spacing: .06em;
+    }
+    .repo-desc {
+      font-size: .87rem;
+      color: var(--muted);
+      line-height: 1.65;
+      flex: 1;
+    }
+    .repo-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .repo-tag {
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      color: var(--muted);
+      border: 1px solid rgba(139,151,179,.2);
+      border-radius: 4px;
+      padding: 3px 9px;
+    }
+    .repo-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      color: var(--gold);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 8px 18px;
+      transition: background var(--trans), border-color var(--trans);
+      align-self: flex-start;
+    }
+    .repo-link:hover {
+      background: rgba(245,158,11,.1);
+      border-color: var(--gold);
+    }
+    .github-profile-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 20px 28px;
+      margin-top: 40px;
+      transition: border-color var(--trans), transform var(--trans);
+    }
+    .github-profile-btn:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+<a name="topo"></a>
+
+<header>
+  <div class="container">
+    <h1><span>Erik Eike</span> Silva de Paiva</h1>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-icon" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </label>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="Historia.html">História</a>
+      <a href="Sobre.html">Sobre</a>
+      <a href="Projetos.html" class="active">Projetos</a>
+      <a href="Certificados.html">Certificados</a>
+      <a href="Fotos.html">Fotos</a>
+      <a href="Contatos.html">Contatos</a>
+      <a href="Contato.html">Contato</a>
+    </nav>
+    <button id="theme-toggle" aria-label="Alternar tema" style="background:none;border:none;cursor:pointer;font-size:1.25rem;line-height:1;padding:6px;border-radius:50%;transition:background var(--trans)" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='none'">🌙</button>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="section-label">// github</div>
+      <h2 class="section-title">Meus Projetos</h2>
+      <p class="section-sub">Repositórios públicos no GitHub — projetos acadêmicos e pessoais em desenvolvimento.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+
+      <div class="repos-grid">
+
+        <!-- C -->
+        <div class="repo-card">
+          <div class="repo-banner">
+            <img src="../image/banner-c.jpg" alt="Banner do projeto C">
+          </div>
+          <div class="repo-body">
+            <div class="repo-header">
+              <div class="repo-icon">⚙️</div>
+              <div>
+                <div class="repo-name">Fundamentos de C</div>
+                <div class="repo-lang">● C Language</div>
+              </div>
+            </div>
+            <p class="repo-desc">
+              Estudo dos fundamentos da linguagem C: tipos de dados, variáveis e arrays. Exercícios práticos desenvolvidos durante a formação técnica para solidificar a base de programação.
+            </p>
+            <div class="repo-tags">
+              <span class="repo-tag">C</span>
+              <span class="repo-tag">Fundamentos</span>
+              <span class="repo-tag">Arrays</span>
+              <span class="repo-tag">Variáveis</span>
+            </div>
+            <a href="https://github.com/Erik_Eike_Silva/Fundamentos-de-C-Tipos-de-Dados-Vari-veis-e-Arrays" target="_blank" class="repo-link github-repo">
+              🐙 Ver no GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- HTML e CSS -->
+        <div class="repo-card">
+          <div class="repo-banner">
+            <img src="../image/banner-html.jpg" alt="Banner do projeto HTML e CSS">
+          </div>
+          <div class="repo-body">
+            <div class="repo-header">
+              <div class="repo-icon">🎨</div>
+              <div>
+                <div class="repo-name">HTML e CSS</div>
+                <div class="repo-lang">● HTML5 / CSS3</div>
+              </div>
+            </div>
+            <p class="repo-desc">
+              Projetos e exercícios de HTML e CSS, incluindo layouts responsivos, Flexbox, Grid e estilização avançada. Base do desenvolvimento web moderno.
+            </p>
+            <div class="repo-tags">
+              <span class="repo-tag">HTML5</span>
+              <span class="repo-tag">CSS3</span>
+              <span class="repo-tag">Flexbox</span>
+              <span class="repo-tag">Grid</span>
+              <span class="repo-tag">Responsivo</span>
+            </div>
+            <a href="https://github.com/Erik_Eike_Silva/HTML-e-CSS" target="_blank" class="repo-link github-repo">
+              🐙 Ver no GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- React -->
+        <div class="repo-card">
+          <div class="repo-banner">
+            <img src="../image/banner-react.svg" alt="Banner do projeto React">
+          </div>
+          <div class="repo-body">
+            <div class="repo-header">
+              <div class="repo-icon">⚛️</div>
+              <div>
+                <div class="repo-name">React</div>
+                <div class="repo-lang">● JavaScript / React</div>
+              </div>
+            </div>
+            <p class="repo-desc">
+              Estudos e projetos desenvolvidos com React: componentes, hooks, estado, props e criação de interfaces dinâmicas para a web.
+            </p>
+            <div class="repo-tags">
+              <span class="repo-tag">React</span>
+              <span class="repo-tag">JavaScript</span>
+              <span class="repo-tag">Hooks</span>
+              <span class="repo-tag">Componentes</span>
+            </div>
+            <a href="https://github.com/Erik_Eike_Silva/React" target="_blank" class="repo-link github-repo">
+              🐙 Ver no GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- React Native -->
+        <div class="repo-card">
+          <div class="repo-banner">
+            <img src="../image/banner-native.jpg" alt="Banner do projeto React Native">
+          </div>
+          <div class="repo-body">
+            <div class="repo-header">
+              <div class="repo-icon">📱</div>
+              <div>
+                <div class="repo-name">React Native</div>
+                <div class="repo-lang">● React Native / Mobile</div>
+              </div>
+            </div>
+            <p class="repo-desc">
+              Desenvolvimento de aplicativos mobile com React Native para Android e iOS. Exploração de componentes nativos, navegação e integração com APIs.
+            </p>
+            <div class="repo-tags">
+              <span class="repo-tag">React Native</span>
+              <span class="repo-tag">Mobile</span>
+              <span class="repo-tag">Android</span>
+              <span class="repo-tag">iOS</span>
+            </div>
+            <a href="https://github.com/Erik_Eike_Silva/React-Native" target="_blank" class="repo-link github-repo">
+              🐙 Ver no GitHub
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /repos-grid -->
+
+      <!-- Link perfil GitHub -->
+      <div style="text-align:center">
+        <a href="https://github.com/Erik_Eike_Silva" target="_blank" class="github-profile-btn">
+          <span style="font-size:1.6rem">🐙</span>
+          <div style="text-align:left">
+            <div style="font-family:var(--font-display);font-weight:600;color:var(--ice);font-size:.95rem">Ver todos os repositórios</div>
+            <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--muted)">github.com/Erik_Eike_Silva</div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p class="footer-copy">&copy; 2026 — <span>Erik Eike Silva de Paiva</span></p>
+    <div style="display:flex;gap:20px;align-items:center">
+      <a href="https://www.linkedin.com/in/erik-eike-silva-459770367/" target="_blank" class="footer-back">🔗 LinkedIn</a>
+      <a href="https://github.com/Erik_Eike_Silva" target="_blank" class="footer-back">🐙 GitHub</a>
+      <a href="#topo" class="footer-back">⬆ Topo</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+</body>
+</html>
