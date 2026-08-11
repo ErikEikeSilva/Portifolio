@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erik Eike — Certificados</title>
+  <link rel="stylesheet" href="../style/style.css">
+  <style>
+    /* ── Filtros ── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 36px 0 32px;
+    }
+
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid rgba(139,151,179,.2);
+      border-radius: 40px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: all var(--trans);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: rgba(245,158,11,.07);
+    }
+
+    /* ── Grid de certificados ── */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .cert-card {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+      position: relative;
+    }
+
+    .cert-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(245,158,11,.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 30px rgba(245,158,11,.07);
+    }
+
+    /* Faixa tipo no topo */
+    .cert-type-bar {
+      height: 3px;
+      width: 100%;
+    }
+    .cert-type-bar.certificado  { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+    .cert-type-bar.emblema      { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .cert-type-bar.conquista    { background: linear-gradient(90deg, #22c55e, #86efac); }
+    .cert-type-bar.curso        { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+
+    .cert-body {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cert-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    /* Ícone SVG estilo Cisco */
+    .cert-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--r-sm);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      position: relative;
+    }
+
+    .cert-icon.cisco-green {
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.2);
+    }
+    .cert-icon.cisco-purple {
+      background: rgba(139,92,246,.1);
+      border: 1px solid rgba(139,92,246,.2);
+    }
+    .cert-icon.cisco-gold {
+      background: rgba(245,158,11,.1);
+      border: 1px solid var(--border);
+    }
+    .cert-icon.cisco-blue {
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+    }
+
+    .cert-meta { flex: 1; }
+
+    .cert-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: .65rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 2px 9px;
+      border-radius: 40px;
+      margin-bottom: 6px;
+    }
+
+    .cert-badge.certificado { background: rgba(245,158,11,.12); color: var(--gold); border: 1px solid var(--border); }
+    .cert-badge.emblema     { background: rgba(139,92,246,.12); color: #a78bfa; border: 1px solid rgba(139,92,246,.25); }
+    .cert-badge.conquista   { background: rgba(34,197,94,.1);   color: #22c55e; border: 1px solid rgba(34,197,94,.2); }
+    .cert-badge.curso       { background: rgba(59,130,246,.1);  color: #93c5fd; border: 1px solid rgba(59,130,246,.2); }
+
+    .cert-name {
+      font-family: var(--font-display);
+      font-size: .97rem;
+      font-weight: 600;
+      color: var(--ice);
+      line-height: 1.3;
+    }
+
+    .cert-issuer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+
+    .issuer-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .cert-date {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+
+    /* Barra de progresso do módulo */
+    .cert-modules {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    .module-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .module-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(34,197,94,.3);
+    }
+
+    .module-dot.done {
+      background: #22c55e;
+      box-shadow: 0 0 6px rgba(34,197,94,.4);
+    }
+
+    /* Rodapé do card */
+    .cert-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cert-platform {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    .cisco-logo {
+      font-size: .8rem;
+      color: #22c55e;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    /* Resumo de stats */
+    .cert-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+
+    .cert-stat {
+      background: var(--navy-card);
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .cert-stat-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .cert-stat-label {
+      font-family: var(--font-mono);
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    /* Hidden/filter */
+    .cert-card[data-hidden="true"] {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .cert-grid { grid-template-columns: 1fr; }
+      .cert-summary { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<a name="topo"></a>
+
+<header>
+  <div class="container">
+    <h1><span>Erik Eike</span> Silva de Paiva</h1>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-icon" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </label>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="Historia.html">História</a>
+      <a href="Sobre.html">Sobre</a>
+      <a href="Projetos.html">Projetos</a>
+      <a href="Certificados.html" class="active">Certificados</a>
+      <a href="Fotos.html">Fotos</a>
+      <a href="Contatos.html">Contatos</a>
+      <a href="Contato.html">Contato</a>
+    </nav>
+    <button id="theme-toggle" aria-label="Alternar tema" style="background:none;border:none;cursor:pointer;font-size:1.25rem;line-height:1;padding:6px;border-radius:50%;transition:background var(--trans)" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='none'">🌙</button>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-header">
+    <div class="container">
+      <div class="section-label">// cisco networking academy</div>
+      <h2 class="section-title">Certificados & Conquistas</h2>
+      <p class="section-sub">Cursos, módulos e badges conquistados na Cisco Networking Academy — <strong style="color:var(--gold)">20+ conquistas registradas</strong></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+
+      <!-- RESUMO -->
+      <div class="cert-summary">
+        <div class="cert-stat">
+          <div class="cert-stat-num">3</div>
+          <div class="cert-stat-label">Cursos Concluídos</div>
+        </div>
+        <div class="cert-stat">
+          <div class="cert-stat-num">4</div>
+          <div class="cert-stat-label">Badges & Emblemas</div>
+        </div>
+        <div class="cert-stat">
+          <div class="cert-stat-num">22+</div>
+          <div class="cert-stat-label">Conquistas</div>
+        </div>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="certificado">Certificados</button>
+        <button class="filter-btn" data-filter="emblema">Badges & Emblemas</button>
+        <button class="filter-btn" data-filter="conquista">Conquistas (Módulos)</button>
+      </div>
+
+      <!-- GRID -->
+      <div class="cert-grid" id="cert-grid">
+
+        <!-- 1 - Certificado Linux Unhatched -->
+        <div class="cert-card" data-type="certificado">
+          <div class="cert-type-bar certificado"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-gold">🐧</div>
+              <div class="cert-meta">
+                <span class="cert-badge certificado">Certificado</span>
+                <div class="cert-name">Linux Unhatched</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy
+            </div>
+            <div class="cert-date">📅 Emitido em: 29 de março de 2026</div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform">
+              <span class="cisco-logo">CISCO</span>
+              <span>netacad.com</span>
+            </div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Concluído</span>
+          </div>
+        </div>
+
+        <!-- 2 - Emblema Linux Unhatched -->
+        <div class="cert-card" data-type="emblema">
+          <div class="cert-type-bar emblema"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-purple">🏅</div>
+              <div class="cert-meta">
+                <span class="cert-badge emblema">Emblema</span>
+                <div class="cert-name">Linux Unhatched</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy
+            </div>
+            <div class="cert-date">📅 Emitido em: 2026</div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform">
+              <span class="cisco-logo">CISCO</span>
+              <span>netacad.com</span>
+            </div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#a78bfa">★ Emblema</span>
+          </div>
+        </div>
+
+        <!-- 3 - Conquista Funções -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">⚙️</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Funções</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 24 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 4 - Conquista Erros e Exceções -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🔧</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Erros, Exceções e Testes</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 11 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 5 - Conquista Execução Condicional -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🔀</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Execução Condicional</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 07 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 6 - Conquista Condicionais Avançadas -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🔁</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Condicionais Avançadas e Loops</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 24 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 7 - Conquista Variáveis e Tipos de Dados -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">📦</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Variáveis, Tipos de Dados e Conversão</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 07 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 8 - Conquista Noções básicas de JS -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="4" fill="#f0db4f"/>
+                  <path d="M7 26l3-1.8c.6 1 1.1 1.9 2.4 1.9 1.2 0 2-.5 2-2.4V13h3.7v10.8c0 4-2.3 5.7-5.8 5.7C9.7 29.5 8 28.3 7 26zm13.5-.4l3-1.8c.8 1.3 1.8 2.3 3.6 2.3 1.5 0 2.5-.8 2.5-1.8 0-1.2-.9-1.7-2.6-2.4l-.9-.4c-2.6-1.1-4.3-2.5-4.3-5.4 0-2.7 2-4.7 5.2-4.7 2.2 0 3.8.8 5 2.9l-2.8 1.8c-.6-1.1-1.3-1.5-2.3-1.5-1 0-1.7.7-1.7 1.5 0 1.1.7 1.5 2.2 2.2l.9.4c3 1.3 4.8 2.7 4.8 5.6 0 3.2-2.5 5-5.9 5-3.3 0-5.4-1.6-6.7-3.7z" fill="#323330"/>
+                </svg>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Noções básicas de JavaScript</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 07 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 9 - Certificado Noções básicas de Redes -->
+        <div class="cert-card" data-type="certificado">
+          <div class="cert-type-bar certificado"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-gold">🌐</div>
+              <div class="cert-meta">
+                <span class="cert-badge certificado">Certificado</span>
+                <div class="cert-name">Noções básicas de Redes</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy
+            </div>
+            <div class="cert-date">📅 15 de maio de 2025</div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Concluído</span>
+          </div>
+        </div>
+
+        <!-- 10 - Emblema Noções básicas de Redes -->
+        <div class="cert-card" data-type="emblema">
+          <div class="cert-type-bar emblema"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-purple">🏅</div>
+              <div class="cert-meta">
+                <span class="cert-badge emblema">Emblema</span>
+                <div class="cert-name">Noções básicas de Redes</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy
+            </div>
+            <div class="cert-date">📅 15 de maio de 2025</div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#a78bfa">★ Emblema</span>
+          </div>
+        </div>
+
+        <!-- 11 - Conquista Sistemas Operacionais -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🖥️</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Sistemas Operacionais</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 15 de maio de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Linux OS + Windows OS</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 12 - Conquista Conectividade -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🔌</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Conectividade de Rede</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 15 de maio de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 13 - Conquista Envolver as partes interessadas -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🤝</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Envolver as Partes Interessadas</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 05 de abril de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Certificado + Emblema</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 14 - Badge Linux Unhatched (Claim) -->
+        <div class="cert-card" data-type="emblema">
+          <div class="cert-type-bar emblema"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-purple">🏅</div>
+              <div class="cert-meta">
+                <span class="cert-badge emblema">Badge</span>
+                <div class="cert-name">Linux Unhatched — Badge</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy
+            </div>
+            <div class="cert-date">📅 Emitido em: 29 de março de 2026</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Badge disponível para claim</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#a78bfa">★ Badge</span>
+          </div>
+        </div>
+
+        <!-- 15 - Conquista Errors, Exceptions, Debugging (Nov 10 - 2ª ocorrência) -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🐞</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Errors, Exceptions, Debugging — Nov 10</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 10 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 16 - Conquista Functions (Nov 10 - 2ª ocorrência) -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🔩</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Functions — Nov 10</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 10 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 17 - Conquista Operators and User Interaction (Nov 07) -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">⌨️</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Operators and User Interaction — Nov 07</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 07 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 18 - Conquista Variables, Data Types Nov 06 -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">📊</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Variables, Data Types, Type Casting — Nov 06</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 06 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 19 - Conquista Operators and User Interaction (Nov 06) -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">🖱️</div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Operators and User Interaction — Nov 06</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 06 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+        <!-- 20 - Conquista Basics of JavaScript (Nov 05) -->
+        <div class="cert-card" data-type="conquista">
+          <div class="cert-type-bar conquista"></div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div class="cert-icon cisco-green">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="4" fill="#f0db4f"/>
+                  <path d="M7 26l3-1.8c.6 1 1.1 1.9 2.4 1.9 1.2 0 2-.5 2-2.4V13h3.7v10.8c0 4-2.3 5.7-5.8 5.7C9.7 29.5 8 28.3 7 26zm13.5-.4l3-1.8c.8 1.3 1.8 2.3 3.6 2.3 1.5 0 2.5-.8 2.5-1.8 0-1.2-.9-1.7-2.6-2.4l-.9-.4c-2.6-1.1-4.3-2.5-4.3-5.4 0-2.7 2-4.7 5.2-4.7 2.2 0 3.8.8 5 2.9l-2.8 1.8c-.6-1.1-1.3-1.5-2.3-1.5-1 0-1.7.7-1.7 1.5 0 1.1.7 1.5 2.2 2.2l.9.4c3 1.3 4.8 2.7 4.8 5.6 0 3.2-2.5 5-5.9 5-3.3 0-5.4-1.6-6.7-3.7z" fill="#323330"/>
+                </svg>
+              </div>
+              <div class="cert-meta">
+                <span class="cert-badge conquista">Conquista</span>
+                <div class="cert-name">Basics of JavaScript — Nov 05</div>
+              </div>
+            </div>
+            <div class="cert-issuer">
+              <span class="issuer-dot"></span>
+              <span class="cisco-logo">CISCO</span>
+              Networking Academy — Módulo
+            </div>
+            <div class="cert-date">📅 05 de novembro de 2025</div>
+            <div class="cert-modules">
+              <div class="module-dots">
+                <div class="module-dot done"></div>
+                <div class="module-dot done"></div>
+              </div>
+              <span>Módulo concluído</span>
+            </div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-platform"><span class="cisco-logo">CISCO</span><span>netacad.com</span></div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:#22c55e">✓ Módulo</span>
+          </div>
+        </div>
+
+      </div><!-- /cert-grid -->
+
+      <!-- Link Cisco -->
+      <div style="text-align:center;margin-top:48px">
+        <a href="https://www.netacad.com" target="_blank" style="display:inline-flex;align-items:center;gap:14px;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 28px;transition:border-color var(--trans),transform var(--trans)" onmouseover="this.style.borderColor='rgba(34,197,94,.4)';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+          <span style="font-size:1.4rem">🌐</span>
+          <div style="text-align:left">
+            <div style="font-family:var(--font-display);font-weight:600;color:var(--ice);font-size:.92rem">Ver perfil na Cisco Networking Academy</div>
+            <div style="font-family:var(--font-mono);font-size:.7rem;color:#22c55e">netacad.com</div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p class="footer-copy">&copy; 2026 — <span>Erik Eike Silva de Paiva</span></p>
+    <div style="display:flex;gap:20px;align-items:center">
+      <a href="https://www.linkedin.com/in/erik-eike-silva-459770367/" target="_blank" class="footer-back">🔗 LinkedIn</a>
+      <a href="https://github.com/Erik_Eike_Silva" target="_blank" class="footer-back">🐙 GitHub</a>
+      <a href="#topo" class="footer-back">⬆ Topo</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/script.js"></script>
+<script>
+// ── Filtro de certificados ────────────────────────────────
+const filterBtns = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('.cert-card');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const filter = btn.dataset.filter;
+    cards.forEach(card => {
+      if (filter === 'all' || card.dataset.type === filter) {
+        card.removeAttribute('data-hidden');
+      } else {
+        card.setAttribute('data-hidden', 'true');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
